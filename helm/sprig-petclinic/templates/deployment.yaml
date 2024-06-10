@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spring-petclinic.fullname" . }}
+  labels:
+    {{- include "spring-petclinic.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "spring-petclinic.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "spring-petclinic.name" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: "/mnt/data"
+          name: spring-petclinic-storage
+      volumes:
+      - name: spring-petclinic-storage
+        persistentVolumeClaim:
+          claimName: {{ include "spring-petclinic.pvcName" . }}
